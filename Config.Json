@@ -1,0 +1,15 @@
+{
+  "feederDir": "D:\\temp\\feedersourcedata",
+  "sqlser": "cnhuam0fccsr01",
+  "sqluser": "sa",
+  "sqlpassword": "Jabil@123...",
+  "sqldbname": "DBCenter",
+  "LogInfo": "1",
+  "webUrl": "http://prd.sfm.hua1.corp.jabil.org/AssetMonitorUI/#!/",
+  "trigger": "4",
+  "trouble": "2",
+  "cause": "1",
+  "action": "2",
+  "detail": "5",
+  "QMNo": "QM1"
+}
