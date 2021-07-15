@@ -3,6 +3,7 @@ from Model.Comm import FeederData
 import xml.etree.ElementTree as ET
 from Tools.ConvertHelper import Converter
 from Tools.Config import ConfigHelper
+from Tools.SysLog import LogHelper
 class excelHandel:
     excelUrl = ""
     def __init__(self,excelPath):
@@ -21,8 +22,24 @@ class excelHandel:
             # sn = table.cell(1, 2).value
             tree = ET.parse(self.excelUrl)
             root = tree.getroot()
-            worksheet = root.getchildren()[3]
-            table = worksheet.getchildren()[0]
+            # 第四和孩子节点是 worksheet
+            worksheet = self.GetElementchildren(root, 3)
+            if worksheet is None :
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，第四个孩子节点获取失败".format(self.excelUrl))
+                return None
+
+            if worksheet.tag.find("Worksheet")<0:
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，第四个孩子节点不是Worksheet 节点".format(self.excelUrl))
+                return None
+
+            table = self.GetElementchildren(worksheet, 0)
+            if table is None:
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，Worksheet 第1孩子节点获取失败".format(self.excelUrl))
+                return None
+
+            if table.tag.find("Table")< 0:
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，Worksheet 第1孩子节不是table 节点".format(self.excelUrl))
+                return None
 
             # xml 第六行是 sn
             snrow = table.getchildren()[5]
@@ -37,8 +54,12 @@ class excelHandel:
             miny = Converter.StrToInt(minrow.getchildren()[2].getchildren()[0].text)
 
             cpkrow = table.getchildren()[26]
-            cpkx = self.FormatElementValue(cpkrow.getchildren()[1].getchildren()[0].text)
-            cpky = self.FormatElementValue(cpkrow.getchildren()[2].getchildren()[0].text)
+
+            cpkxCel = self.GetElementchildren(cpkrow, 1)
+            cpkx = self.GetElementText(self.GetElementchildren(cpkxCel, 0))
+
+            cpkyCel = self.GetElementchildren(cpkrow, 2)
+            cpky = self.GetElementText(self.GetElementchildren(cpkyCel, 0))
 
             trigger = ConfigHelper.GetConfig("trigger", "1")
             trouble = ConfigHelper.GetConfig("trouble", "1")
@@ -52,8 +73,6 @@ class excelHandel:
         except Exception as e:
             print('from dir ', self.excelUrl, 'load feeder source data error', repr(e))
             return None
-        else:
-            print("success")
 
 
     def FormatElementValue(self,value):
@@ -61,6 +80,29 @@ class excelHandel:
             return ""
 
         return value
+
+    def GetElementText(self,element):
+        if element is None:
+            return ""
+
+        text = element.text
+        if text is None:
+            return ""
+
+        return text
+
+    def GetElementchildren(self,element,index):
+        if element is None:
+            return None
+
+        childs = element.getchildren()
+        childlen = childs.__len__()
+        if childlen < index+1:
+            return None
+
+        return childs[index]
+
+
 
 
 
