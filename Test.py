@@ -3,6 +3,8 @@ from past.builtins import raw_input
 from Tools.SysLog import LogHelper
 from Tools.RepeatingTimer import RepeatingTimer
 from Tools.Config import ConfigHelper
+from Tools.Win32Helper import Win32ComHelper
+
 import sys
 i = 0
 def Hello():
@@ -14,11 +16,15 @@ def Hello():
 
 
 if __name__ == '__main__':
+    result = Win32ComHelper.check_exsit("chrome.exe")
+    print(result)
+
+    Win32ComHelper.killProcess("chrome.exe")
     #timer = RepeatingTimer(10, Hello)  # 1代表1秒后执行
     #timer.start()  # 启动定时器
 
-    cfg = ConfigHelper.GetConfig("feederDir")
-    print(cfg)
+    # cfg = ConfigHelper.GetConfig("feederDir")
+    # print(cfg)
     # xixi = BusResult.Fail()
     # print(xixi.Msg)
 

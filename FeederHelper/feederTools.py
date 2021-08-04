@@ -12,7 +12,7 @@ from Dal.FeederDataDal import FeederDataDal
 from Tools.SysLog import  LogHelper
 from Tools.Config import ConfigHelper
 import uuid
-class FeederFun():
+class FeederFun:
     Fdal = None
     def __init__(self):
         self.Fdal = FeederDataDal()
@@ -59,8 +59,18 @@ class FeederFun():
                                          feederdata.MaxToleranceY, feederdata.MinToleranceY, feederdata.CpkY, 0, qmno)
                     inserResult = self.Fdal.Insert(item)
                     if inserResult.Code != 0:
-                        print(' put feederdata  which load from xml file[',feederdatapath,'] into db fail ：', ',',feederdata.FeederSn)
-                        LogHelper.LogError("put the data which load from file [{0}] into db fail ,sn:{1},msg:[{2}]".format(feederdatapath, feederdata.FeederSn,inserResult.Msg))
+                        if inserResult.Code == -2:
+                            print(" feeder data  which load from xml file[{0}],feeder sn:[{1}] was already put into  sfm system ".format(feederdatapath,feederdata.FeederSn))
+                            successCount = successCount + 1
+                            # 删除文件
+                            try:
+                                os.remove(feederdatapath)
+                            except Exception as e:
+                                print(e.__str__())
+                            pass
+                        else:
+                            print(' put feederdata  which load from xml file[{0}] into db fail ,error msg ：[{1}]'.format(feederdatapath,inserResult.Msg))
+                            LogHelper.LogError("put the data which load from file [{0}] into db fail ,sn:{1},msg:[{2}]".format(feederdatapath, feederdata.FeederSn,inserResult.Msg))
                         break
 
                     totalCount = totalCount + 1

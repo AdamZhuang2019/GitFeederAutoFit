@@ -7,9 +7,9 @@
   "LogInfo": "1",
   "webUrl": "http://prd.sfm.hua1.corp.jabil.org/AssetMonitorUI/#!/",
   "trigger": "4",
-  "trouble": "2",
+  "trouble": "3",
   "cause": "1",
-  "action": "2",
-  "detail": "5",
+  "action": "3",
+  "detail": "1",
   "QMNo": "QM1"
 }
