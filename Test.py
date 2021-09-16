@@ -16,10 +16,14 @@ def Hello():
 
 
 if __name__ == '__main__':
-    result = Win32ComHelper.check_exsit("chrome.exe")
-    print(result)
 
-    Win32ComHelper.killProcess("chrome.exe")
+    print(10 % 3)
+    print(10 // 3)
+    print(10 / 3)
+    # result = Win32ComHelper.check_exsit("chrome.exe")
+    # print(result)
+
+    # Win32ComHelper.killProcess("chrome.exe")
     #timer = RepeatingTimer(10, Hello)  # 1代表1秒后执行
     #timer.start()  # 启动定时器
 

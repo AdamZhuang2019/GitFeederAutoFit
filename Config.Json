@@ -5,11 +5,11 @@
   "sqlpassword": "Jabil@123...",
   "sqldbname": "DBCenter",
   "LogInfo": "1",
-  "webUrl": "http://prd.sfm.hua1.corp.jabil.org/AssetMonitorUI/#!/",
+  "webUrl": "http://prd.sfm.hua3.corp.jabil.org/AssetMonitorUI/#!/",
   "trigger": "4",
-  "trouble": "3",
+  "trouble": "2",
   "cause": "1",
-  "action": "3",
+  "action": "2",
   "detail": "1",
-  "QMNo": "QM1"
+  "QMNo": "QM3"
 }

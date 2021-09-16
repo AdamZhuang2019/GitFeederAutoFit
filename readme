@@ -1,0 +1,10 @@
+打包命令：
+1.首先需要安装插件PyInstaller，
+在点击底部的【Terminal】打开终端，中输入命令pip install pyinstaller后回车，等待安装完毕
+输入命令 pyinstaller，回车显示安装成功
+2. 在Terminal下输入：“PyInstaller -F -w *.py” 就可以制作出exe。生成的文件放在同目录dist下。
+-F（注意大写）是所有库文件打包成一个exe，-w是不出黑色控制台窗口。
+    	不加-F参数生成一堆文件，但运行快。压缩后比单个exe文件还小一点点。
+    	加-F参数生成一个exe文件，运行起来慢。
+	Pyinstaller -F -w *.py
+3.另一个例子打包指令 pyinstaller --console --onefile jingyan_frame.py

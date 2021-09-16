@@ -51,3 +51,26 @@ class BusResult:
     def Creat(code, msg,data=None):
         result = BusResult(code,msg,data)
         return result
+
+class FindElementResult:
+    Result = False
+    Data = None
+
+    def __init__(self, result, data):
+        self.Result = result
+        self.Data = data
+
+    @staticmethod
+    def Success(data=None):
+        item = FindElementResult.Creat(True, data)
+        return item
+
+    @staticmethod
+    def Fail():
+        item = FindElementResult.Creat(False, None)
+        return item
+
+    @staticmethod
+    def Creat(result, data=None):
+        result = FindElementResult(result, data)
+        return result
