@@ -427,7 +427,7 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("min-y-tolerance").send_keys(feederdata.MaxToleranceY)
+                driver.find_element_by_id("min-y-tolerance").send_keys(feederdata.MinToleranceY)
             except:
                 print("can not set input [min-y-tolerance] value ! try the {0} times later".format(trytime+1))
                 if trytime > 10:
@@ -470,8 +470,15 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+        # 获取保存按钮
+        result = self.find_element_by_css_selector(driver, "button.btn-green")
+        if result.Result is False:
+            print("can not find button[Save]!")
+            self.closedNewEntry(driver)
+            return False
 
-        save = driver.find_element_by_css_selector("button.btn-green")
+        save = result.Data
+
         cansave = save.get_property("disabled")
         if cansave is True:
             print("SN:", feederdata.FeederSn, 'can not save in to sfm system ！')

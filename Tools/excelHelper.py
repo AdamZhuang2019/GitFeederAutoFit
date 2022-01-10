@@ -45,16 +45,38 @@ class excelHandel:
             snrow = table.getchildren()[5]
             sn = snrow.getchildren()[1].getchildren()[0].text
 
-            maxrow = table.getchildren()[21]
+            maxrow = self.GetElementRowByKey(table, 'Max (um)')
+            if maxrow is None:
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，从table节点中找不到孩子节点Max (um)".format(self.excelUrl))
+                return None
+
+            # maxrow = table.getchildren()[21]
             maxx = Converter.StrToInt(maxrow.getchildren()[1].getchildren()[0].text)
             maxy = Converter.StrToInt(maxrow.getchildren()[2].getchildren()[0].text)
 
-            minrow = table.getchildren()[22]
+            minrow = self.GetElementRowByKey(table, 'Min (um)')
+            if minrow is None:
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，从table节点中找不到孩子节点Min (um)".format(self.excelUrl))
+                return None
+
+            # minrow = table.getchildren()[22]
             minx = Converter.StrToInt(minrow.getchildren()[1].getchildren()[0].text)
             miny = Converter.StrToInt(minrow.getchildren()[2].getchildren()[0].text)
+            # <Row ss:AutoFitHeight="0">
+            # <Cell ss:Index="2" ss:StyleID="s21"><Data ss:Type="String">Cpk</Data></Cell>
+            # <Cell ss:StyleID="s42"><Data ss:Type="Number">5.62</Data></Cell>
+            # <Cell ss:StyleID="s42"><Data ss:Type="Number">3.35</Data></Cell>
+            # <Cell ss:StyleID="s42"></Cell>
+            # </Row>
 
-            cpkrow = table.getchildren()[26]
+            #cpkrow = table.getchildren()[26]
+            cpkrow = self.GetElementRowByKey(table, 'cpk')
 
+            if cpkrow is None:
+                LogHelper.LogError("xml 文件：[{0}] 格式不正确，从table节点中找不到孩子节点cpk".format(self.excelUrl))
+                return None
+
+            #判断是否抓取到了CPK 行
             cpkxCel = self.GetElementchildren(cpkrow, 1)
             cpkx = self.GetElementText(self.GetElementchildren(cpkxCel, 0))
 
@@ -74,6 +96,20 @@ class excelHandel:
             print('from dir ', self.excelUrl, 'load feeder source data error', repr(e))
             return None
 
+
+    def GetElementRowByKey(self,rootElement,key):
+        key = key.lower()
+        for x in rootElement.getchildren():
+            strcel = self.GetElementchildren(x, 0)
+            str = self.GetElementText(self.GetElementchildren(strcel, 0))
+
+            if str is None:
+                continue
+
+            str = str.lower()
+            if str == key:
+                return x
+        return None
 
     def FormatElementValue(self,value):
         if value is None:
