@@ -23,7 +23,9 @@ class FeederFun:
         # 杀死这个chromedriver进程，因为每次启动都会打开，所以需要kill，这里用的chrome浏览器，打开方式时chromedriver.exe。
         # 需要放在代码同一目录下，不明白的可以搜索
         # os.system("taskkill /f /im chromedriver.exe")
-        driver = webdriver.Chrome()
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option("excludeSwitches", ["enable - logging"])
+        driver = webdriver.Chrome(options=options)
         weburl = ConfigHelper.GetConfig("webUrl")
         driver.get(weburl)
         driver.maximize_window()
@@ -96,16 +98,21 @@ class FeederFun:
 
     def doneFit(self, driver, feederdata):
 
-        print(u'begin entered feeder data')
+        print(u'01-begin entered feeder data,closedNewEntry first!')
+        self.closedNewEntry(driver)
+        print(u'02-begin entered feeder data,closedNewEntry end!')
+
         result = self.find_element_by_css_selector_Click(driver, "button.btn")
         if result is not True:
-            print("can not click gear button！")
+            print("03-can not click green button to show menu list ！")
             return False
 
         result = self.find_element_by_link_text_Click(driver, "Preventative Maintenance - New Entry")
         if result is not True:
-            print(" can not click Preventative Maintenance - New Entry button！")
+            print(" 04-can not click Preventative Maintenance - New Entry button！")
             return False
+
+        print(" 05-begin input feeder sn ！")
 
         findSuccess = False
         trytime = 0
@@ -119,8 +126,10 @@ class FeederFun:
                 if trytime >10:
                     findSuccess= True
                     trytime = 0
-                    LogHelper.LogError("没有找到feeder sn 录入框")
-                    self.closeTip(driver)
+                    LogHelper.LogError("没有找到feeder sn 录入框,并且重试了10次！")
+                    print(" 05-01- input feeder sn fail ！")
+                    self.closedNewEntry(driver)
+
                     return False
                 trytime=trytime+1
                 pass
@@ -131,12 +140,15 @@ class FeederFun:
         sleep(1)
         self.closeTip(driver)
 
+        print(" 06-get feeder sn ！")
         newsn = driver.find_element_by_id("feeder").get_property("value")
         if newsn == '':
             print("SN:", feederdata.FeederSn, 'illegal')
             # 需要找到关闭按钮 点击关闭
             self.closedNewEntry(driver)
             return False
+
+        print(" 07-begin find trigger select ！")
 
         findSuccess = False
         trytime = 0
@@ -149,6 +161,7 @@ class FeederFun:
                 if trytime >10:
                     findSuccess= True
                     trytime = 0
+                    print(" 07-01- find  trigger select fail ！")
                     self.closedNewEntry(driver)
                     return False
                 trytime=trytime+1
@@ -156,18 +169,22 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 08-begin check trigger select is enable！")
+
         canTri = triSel.get_property("disabled")
         if canTri is True:
-            print("SN:", feederdata.FeederSn, 'illegal')
+            print("08-01-SN:", feederdata.FeederSn, 'illegal')
             # 需要找到关闭按钮 点击关闭
             self.closedNewEntry(driver)
             return False
+
+        print(" 09-begin click trigger to show all options！")
 
         trivalue = driver.find_element_by_css_selector("#trigger>a>span>span.ng-scope").text
         if trivalue == "":
             triSel.click()
 
-            print(" select trigger")
+            print(" 09-01-begin select trigger option")
             findSuccess = False
             trytime = 0
             while (findSuccess is False):
@@ -178,6 +195,7 @@ class FeederFun:
                     print("can not find select option of [trigger]! try the {0} times later".format(trytime+1))
                     if trytime > 10:
                         # 需要找到关闭按钮 点击关闭
+                        print(" 09-02- select trigger option fail ")
                         self.closedNewEntry(driver)
                         findSuccess = True
                     else:
@@ -189,6 +207,7 @@ class FeederFun:
         # Select(opt).select_by_index(1)
         # Select(opt).select_by_value('03')
         # 填写 Root Cause * trouble
+        print(" 10-begin find trouble select")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -205,7 +224,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
-        print("select select option of [trouble]  ")
+        print("10-01-select select option of [trouble]  ")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -223,6 +242,8 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 11-begin find cause select")
+
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -239,7 +260,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
-        print("select cause option ")
+        print("11-01-select cause option ")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -256,6 +277,8 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+
+        print(" 12-begin add trouble/cause")
 
         findSuccess = False
         trytime = 0
@@ -274,6 +297,7 @@ class FeederFun:
                 trytime = 0
 
         # 填写 Action/Solution *  注意孩子节点是从1开始计数
+        print(" 13-begin find action select ")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -290,7 +314,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
-        print("select action option")
+        print("13-01-select action option")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -308,6 +332,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 14-begin find detail select ")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -324,7 +349,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
-        print("select detail option")
+        print("14-01-select detail option")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -342,6 +367,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 15-begin add Action/Detail")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -359,6 +385,7 @@ class FeederFun:
                 trytime = 0
 
         # 填写optional entries
+        print(" 16- fill max-x-tolerance")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -375,6 +402,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 17- fill min-x-tolerance")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -390,6 +418,8 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+
+        print(" 18- fill cpk-x-tolerance")
 
         findSuccess = False
         trytime = 0
@@ -407,6 +437,8 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 19- fill max-y-tolerance")
+
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -422,6 +454,8 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+
+        print(" 20- fill min-y-tolerance")
 
         findSuccess = False
         trytime = 0
@@ -439,6 +473,8 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 21- fill cpk-y-tolerance")
+
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -455,6 +491,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
+        print(" 22- begin NewEntry save ")
         findSuccess = False
         trytime = 0
         while (findSuccess is False):
@@ -488,11 +525,12 @@ class FeederFun:
             self.closedNewEntry(driver)
             return False
 
-        print("begin save in sfm system ")
+        print("23-real save into sfm system ")
 
         save.click()
         sleep(3)
         self.closedNewEntry(driver)
+        print("24- end NewEntry save ")
         return True
 
     # 关闭新建窗口函数
@@ -505,7 +543,7 @@ class FeederFun:
             try:
                 driver.find_element_by_css_selector(".modal-footer>.btn-default").click()
             except:
-                print("can not find button[Close]!")
+                print("can not find button[Close] to begin close  New Entry Dialog,try again!")
                 if trytime >10:
                     findSuccess= True
                     trytime = 0
@@ -513,6 +551,8 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+                print("finish click  button[Close] to begin close New Entry Dialog!")
+                LogHelper.Log("finish click  button[Close] to begin close New Entry Dialog!", "Info")
 
         # 需要关闭弹出框
         findSuccess = False
@@ -524,7 +564,7 @@ class FeederFun:
                 confirmBut.click()
                 # 需要关闭弹出框
             except:
-                print("can not find ok button in confirm form!")
+                print("can not find ok button in confirm form,to  real close New Entry Dialog,try again !")
                 if trytime > 10:
                     findSuccess = True
                     trytime = 0
@@ -533,6 +573,8 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+                print("finish click  ok button in confirm form,to  real close New Entry Dialog!")
+                LogHelper.Log("finish click  ok button in confirm form,to  real close New Entry Dialog!", "Info")
 
     #关闭信息提示框 并取到错误信息 打印出来
     def closeTip(self,driver):
@@ -545,7 +587,7 @@ class FeederFun:
                 print(tip)
                 driver.find_element_by_css_selector("#toast-container .toast-close-button").click()
             except:
-                print("can not find close but on tip form !")
+                print("close tip form fail, try again!")
                 if trytime > 10:
                     findSuccess = True
                     trytime = 0
@@ -553,6 +595,8 @@ class FeederFun:
             else:
                 findSuccess = True
                 trytime = 0
+                LogHelper.Log("finish close tip form !", "Info")
+                print("finish close tip form !")
     #使用ID查找元素
     def find_element_by_id(self,driver,elementId):
         findSuccess = False
