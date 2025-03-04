@@ -2,6 +2,7 @@ import json
 import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 from time import sleep
 
 from Model.Comm import FindElementResult
@@ -34,7 +35,9 @@ class FeederFun:
 
         timer = RepeatingTimer(30, self.beginFit, (driver,))  # 1代表1秒后执行
         timer.start()  # 启动定时器
-        # self.beginFit(driver)
+
+        #测试时使用此方法直接调用
+        #elf.beginFit(driver)
 
     def beginFit(self,driver):
         print("timer begin to run ！")
@@ -61,10 +64,11 @@ class FeederFun:
                                          feederdata.MinToleranceX, feederdata.CpkX,
                                          feederdata.MaxToleranceY, feederdata.MinToleranceY, feederdata.CpkY, 0, qmno)
                     inserResult = self.Fdal.Insert(item)
-                    if inserResult.Code != 0:
+                    if inserResult.Code != 0: # 这里是测试 需要改回 0
                         if inserResult.Code == -2:
                             print(" feeder data  which load from xml file[{0}],feeder sn:[{1}] was already put into  sfm system ".format(feederdatapath,feederdata.FeederSn))
                             successCount = successCount + 1
+                            item.Id=inserResult.Data.Id
                             # 删除文件
                             try:
                                 os.remove(feederdatapath)
@@ -74,7 +78,7 @@ class FeederFun:
                         else:
                             print(' put feederdata  which load from xml file[{0}] into db fail ,error msg ：[{1}]'.format(feederdatapath,inserResult.Msg))
                             LogHelper.LogError("put the data which load from file [{0}] into db fail ,sn:{1},msg:[{2}]".format(feederdatapath, feederdata.FeederSn,inserResult.Msg))
-                        break
+                        continue
 
                     totalCount = totalCount + 1
 
@@ -101,12 +105,12 @@ class FeederFun:
         print(u'01-begin entered feeder data,closedNewEntry first!')
         self.closedNewEntry(driver)
         print(u'02-begin entered feeder data,closedNewEntry end!')
-
+        sleep(3)
         result = self.find_element_by_css_selector_Click(driver, "button.btn")
         if result is not True:
             print("03-can not click green button to show menu list ！")
             return False
-
+        sleep(1)
         result = self.find_element_by_link_text_Click(driver, "Preventative Maintenance - New Entry")
         if result is not True:
             print(" 04-can not click Preventative Maintenance - New Entry button！")
@@ -118,19 +122,19 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("feeder").send_keys(feederdata.FeederSn)
+                driver.find_element(By.ID,"feeder").send_keys(feederdata.FeederSn)
                 sleep(1)
-                driver.find_element_by_id("feeder").send_keys(Keys.ENTER)
+                driver.find_element(By.ID,"feeder").send_keys(Keys.ENTER)
+                sleep(1)
             except:
                 print("can not find input [feeder] to put in feeder sn！ try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime >10:
-                    findSuccess= True
-                    trytime = 0
                     LogHelper.LogError("没有找到feeder sn 录入框,并且重试了10次！")
                     print(" 05-01- input feeder sn fail ！")
                     self.closedNewEntry(driver)
-
                     return False
+
                 trytime=trytime+1
                 pass
             else:
@@ -141,7 +145,7 @@ class FeederFun:
         self.closeTip(driver)
 
         print(" 06-get feeder sn ！")
-        newsn = driver.find_element_by_id("feeder").get_property("value")
+        newsn = driver.find_element(By.ID,"feeder").get_property("value")
         if newsn == '':
             print("SN:", feederdata.FeederSn, 'illegal')
             # 需要找到关闭按钮 点击关闭
@@ -155,9 +159,10 @@ class FeederFun:
         triSel = None
         while (findSuccess is False):
             try:
-                triSel = driver.find_element_by_id("trigger")
+                triSel = driver.find_element(By.ID,"trigger")
             except:
                 print("没有找到[trigger]下拉框！ try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime >10:
                     findSuccess= True
                     trytime = 0
@@ -180,7 +185,7 @@ class FeederFun:
 
         print(" 09-begin click trigger to show all options！")
 
-        trivalue = driver.find_element_by_css_selector("#trigger>a>span>span.ng-scope").text
+        trivalue = driver.find_element(By.CSS_SELECTOR,"#trigger>a>span>span.ng-scope").text
         if trivalue == "":
             triSel.click()
 
@@ -189,9 +194,10 @@ class FeederFun:
             trytime = 0
             while (findSuccess is False):
                 try:
-                    driver.find_element_by_css_selector(
+                    driver.find_element(By.CSS_SELECTOR,
                         "#trigger>div>ul>li>ul li:nth-child(" + feederdata.Trigger + ")").click()
                 except:
+                    sleep(1)
                     print("can not find select option of [trigger]! try the {0} times later".format(trytime+1))
                     if trytime > 10:
                         # 需要找到关闭按钮 点击关闭
@@ -212,8 +218,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("trouble").click()
+                driver.find_element(By.ID,"trouble").click()
             except:
+                sleep(1)
                 print("can not find select [trouble] try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -229,9 +236,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector(
+                driver.find_element(By.CSS_SELECTOR,
                     "#trouble>div>ul>li>ul li:nth-child(" + feederdata.Trouble + ")").click()
             except:
+                sleep(1)
                 print("can not find any option of select: [trouble]! try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -248,8 +256,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("cause").click()
+                driver.find_element(By.ID,"cause").click()
             except:
+                sleep(1)
                 print("can not find select [cause]! try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -265,9 +274,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector(
+                driver.find_element(By.CSS_SELECTOR,
                     "#cause>div>ul>li>ul li:nth-child(" + feederdata.Cause + ")").click()
             except:
+                sleep(1)
                 print("can not find any option of select [cause]! try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -284,8 +294,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector('button[uib-tooltip="Add Trouble/Cause"]').click()
+                driver.find_element(By.CSS_SELECTOR,'button[uib-tooltip="Add Trouble/Cause"]').click()
             except:
+                sleep(1)
                 print("can not find button[Add Trouble/Cause] try the {0} times later".format(trytime+1))
                 if trytime >5:
                     findSuccess= True
@@ -302,8 +313,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("action").click()
+                driver.find_element(By.ID,"action").click()
             except:
+                sleep(1)
                 print("can not find select [action]!")
                 if trytime >10:
                     findSuccess= True
@@ -319,9 +331,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector(
+                driver.find_element(By.CSS_SELECTOR,
                     "#action>div>ul>li>ul li:nth-child(" + feederdata.Action + ")").click()
             except:
+                sleep(1)
                 print("can not find any option of [action] select ! try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -337,8 +350,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("detail").click()
+                driver.find_element(By.ID, "detail").click()
             except:
+                sleep(1)
                 print("can not find select [detail]! try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -354,9 +368,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector(
+                driver.find_element(By.CSS_SELECTOR,
                     "#detail>div>ul>li>ul li:nth-child(" + feederdata.Detail + ")").click()
             except:
+                sleep(1)
                 print("can not find any option of [detail] select!  try the {0} times later".format(trytime+1))
                 if trytime >10:
                     findSuccess= True
@@ -372,8 +387,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector('button[uib-tooltip="Add Action/Detail"]').click()
+                # driver.find_element_by_css_selector('button[uib-tooltip="Add Action/Detail"]').click()
+                driver.find_element(By.CSS_SELECTOR, 'button[uib-tooltip="Add Action/Detail"]').click()
             except:
+                sleep(1)
                 print("can not find button[Add Action/Detail]! try the {0} times later".format(trytime+1))
                 if trytime >5:
                     findSuccess= True
@@ -390,8 +407,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("max-x-tolerance").send_keys(feederdata.MaxToleranceX)
+                driver.find_element(By.ID,"max-x-tolerance").send_keys(feederdata.MaxToleranceX)
             except:
+                sleep(1)
                 print("can not set input [max-x-tolerance] value !  try the {0} times later".format(trytime+1))
                 if trytime > 10:
                     findSuccess = True
@@ -407,8 +425,9 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("min-x-tolerance").send_keys(feederdata.MinToleranceX)
+                driver.find_element(By.ID,"min-x-tolerance").send_keys(feederdata.MinToleranceX)
             except:
+                sleep(1)
                 print("can not set input [min-x-tolerance] value ! try the {0} times later".format(trytime+1))
                 if trytime > 10:
                     findSuccess = True
@@ -425,9 +444,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("cpk-x-tolerance").send_keys(feederdata.CpkX)
+                driver.find_element(By.ID,"cpk-x-tolerance").send_keys(feederdata.CpkX)
             except:
                 print("can not set input [cpk-x-tolerance] value ! try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime > 10:
                     findSuccess = True
                     trytime = 0
@@ -443,9 +463,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("max-y-tolerance").send_keys(feederdata.MaxToleranceY)
+                driver.find_element(By.ID,"max-y-tolerance").send_keys(feederdata.MaxToleranceY)
             except:
                 print("can not set input [max-y-tolerance] value ! try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime > 10:
                     findSuccess = True
                     trytime = 0
@@ -461,9 +482,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("min-y-tolerance").send_keys(feederdata.MinToleranceY)
+                driver.find_element(By.ID, "min-y-tolerance").send_keys(feederdata.MinToleranceY)
             except:
                 print("can not set input [min-y-tolerance] value ! try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime > 10:
                     findSuccess = True
                     trytime = 0
@@ -479,9 +501,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_id("cpk-y-tolerance").send_keys(feederdata.CpkY)
+                driver.find_element(By.ID,"cpk-y-tolerance").send_keys(feederdata.CpkY)
             except:
                 print("can not set input [cpk-y-tolerance] value ! try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime > 10:
                     findSuccess = True
                     trytime = 0
@@ -496,9 +519,10 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector("button.btn-green")
+                driver.find_element(By.CSS_SELECTOR,"button.btn-green")
             except:
                 print("can not find button[Save]! try the {0} times later".format(trytime+1))
+                sleep(1)
                 if trytime >10:
                     findSuccess= True
                     trytime = 0
@@ -508,6 +532,7 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
         # 获取保存按钮
+        # result = self.find_element_by_css_selector(driver, "button.btn-green")
         result = self.find_element_by_css_selector(driver, "button.btn-green")
         if result.Result is False:
             print("can not find button[Save]!")
@@ -528,7 +553,7 @@ class FeederFun:
         print("23-real save into sfm system ")
 
         save.click()
-        sleep(3)
+        sleep(1)
         self.closedNewEntry(driver)
         print("24- end NewEntry save ")
         return True
@@ -541,7 +566,7 @@ class FeederFun:
         trytime =0
         while (findSuccess is False):
             try:
-                driver.find_element_by_css_selector(".modal-footer>.btn-default").click()
+                driver.find_element(By.CSS_SELECTOR, ".modal-footer>.btn-default").click()
             except:
                 print("can not find button[Close] to begin close  New Entry Dialog,try again!")
                 if trytime >10:
@@ -559,7 +584,8 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                confirmBut=driver.find_element_by_css_selector("#cboxLoadedContent .btn-primary")
+                # confirmBut=driver.find_element_by_css_selector("#cboxLoadedContent .btn-primary")
+                confirmBut=driver.find_element(By.CSS_SELECTOR, "#cboxLoadedContent .btn-primary")
                 sleep(2)
                 confirmBut.click()
                 # 需要关闭弹出框
@@ -582,10 +608,11 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
             try:
-                tip = driver.find_element_by_css_selector("#toast-container .toast-message").text
+                # tip = driver.find_element_by_css_selector("#toast-container .toast-message").text
+                tip = driver.find_element(By.CSS_SELECTOR, "#toast-container .toast-message").text
                 LogHelper.Log(tip, "Info")
                 print(tip)
-                driver.find_element_by_css_selector("#toast-container .toast-close-button").click()
+                driver.find_element(By.CSS_SELECTOR, "#toast-container .toast-close-button").click()
             except:
                 print("close tip form fail, try again!")
                 if trytime > 10:
@@ -604,10 +631,11 @@ class FeederFun:
 
         while (findSuccess is False):
             try:
-                obj = driver.find_element_by_id(elementId)
+                obj = driver.find_element(By.ID, elementId)
                 return FindElementResult.Success(obj)
             except:
                 print("can not find element [{0}] by id ! try the {1} times later".format(elementId, trytime + 1))
+                sleep(1)
                 if trytime > 10:
                     return FindElementResult.Fail()
                 trytime = trytime + 1
@@ -619,10 +647,11 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
            try:
-                obj = driver.find_element_by_css_selector(cssSelector)
+                obj = driver.find_element(By.CSS_SELECTOR, cssSelector)
                 return FindElementResult.Success(obj)
            except:
                 print("can not find element [{0}] by css  ! try the {1} times later".format(cssSelector, trytime + 1))
+                sleep(1)
                 if trytime > 10:
                     return FindElementResult.Fail()
                 trytime = trytime + 1
@@ -633,10 +662,11 @@ class FeederFun:
         trytime = 0
         while (findSuccess is False):
            try:
-                obj = driver.find_element_by_link_text(linkText)
+                obj = driver.find_element(By.LINK_TEXT,linkText)
                 return FindElementResult.Success(obj)
            except:
                 print("can not find element by text [{0}] ! try the {1} times later".format(linkText, trytime + 1))
+                sleep(1)
                 if trytime > 10:
                     return FindElementResult.Fail()
                 trytime = trytime + 1
@@ -657,6 +687,7 @@ class FeederFun:
                 return True
             except:
                 print("element [{0}] click fail ! try the {1} times later".format(elementId, trytime + 1))
+                sleep(1)
                 if trytime > 10:
                     return False
                 trytime = trytime + 1
@@ -673,12 +704,15 @@ class FeederFun:
             try:
                 result.Data.click()
                 findSuccess = True
-                return True
+                break
             except:
                 print("element [{0}] click fail ! try the {1} times later".format(cssSelector, trytime + 1))
+                sleep(1)
                 if trytime > 10:
-                    return False
+                    break
                 trytime = trytime + 1
+
+        return findSuccess
 
     def find_element_by_link_text_Click(self, driver, linkText):
         findSuccess = False
@@ -695,6 +729,7 @@ class FeederFun:
                 return True
             except:
                 print("element [{0}] click fail ! try the {1} times later".format(linkText, trytime + 1))
+                sleep(1)
                 if trytime > 10:
                     return False
                 trytime = trytime + 1

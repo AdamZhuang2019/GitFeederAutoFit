@@ -17,7 +17,7 @@ class FeederDataDal:
         if queryresult.Code ==0:
             itexists = queryresult.Data
             if itexists.Status == 1:
-                return BusResult.Creat(-2,"feeder data whit sn:[{0}] was already put into sfm system".format(item.FeederSn),None)
+                return BusResult.Creat(-2,"feeder data whit sn:[{0}] was already put into sfm system".format(item.FeederSn),itexists)
             else:
                 return BusResult.Success()
 

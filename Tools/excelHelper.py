@@ -1,4 +1,3 @@
-import xlrd
 from Model.Comm import FeederData
 import xml.etree.ElementTree as ET
 from Tools.ConvertHelper import Converter
@@ -42,8 +41,9 @@ class excelHandel:
                 return None
 
             # xml 第六行是 sn
-            snrow = table.getchildren()[5]
-            sn = snrow.getchildren()[1].getchildren()[0].text
+            snrow = self.GetElementchildren(table, 5)
+            # sn = snrow.getchildren()[1].getchildren()[0].text
+            sn = self.GetElementText(self.GetElementchildren(self.GetElementchildren(snrow, 1), 0))
 
             maxrow = self.GetElementRowByKey(table, 'Max (um)')
             if maxrow is None:
@@ -51,8 +51,10 @@ class excelHandel:
                 return None
 
             # maxrow = table.getchildren()[21]
-            maxx = Converter.StrToInt(maxrow.getchildren()[1].getchildren()[0].text)
-            maxy = Converter.StrToInt(maxrow.getchildren()[2].getchildren()[0].text)
+            # maxx = Converter.StrToInt(maxrow.getchildren()[1].getchildren()[0].text)
+            # maxy = Converter.StrToInt(maxrow.getchildren()[2].getchildren()[0].text)
+            maxx = Converter.StrToInt(self.GetElementText(self.GetElementchildren(self.GetElementchildren(maxrow, 1), 0)))
+            maxy = Converter.StrToInt(self.GetElementText(self.GetElementchildren(self.GetElementchildren(maxrow, 2), 0)))
 
             minrow = self.GetElementRowByKey(table, 'Min (um)')
             if minrow is None:
@@ -60,8 +62,11 @@ class excelHandel:
                 return None
 
             # minrow = table.getchildren()[22]
-            minx = Converter.StrToInt(minrow.getchildren()[1].getchildren()[0].text)
-            miny = Converter.StrToInt(minrow.getchildren()[2].getchildren()[0].text)
+            # minx = Converter.StrToInt(minrow.getchildren()[1].getchildren()[0].text)
+            # miny = Converter.StrToInt(minrow.getchildren()[2].getchildren()[0].text)
+
+            minx = Converter.StrToInt(self.GetElementText(self.GetElementchildren(self.GetElementchildren(minrow, 1), 0)))
+            miny = Converter.StrToInt(self.GetElementText(self.GetElementchildren(self.GetElementchildren(minrow, 2), 0)))
             # <Row ss:AutoFitHeight="0">
             # <Cell ss:Index="2" ss:StyleID="s21"><Data ss:Type="String">Cpk</Data></Cell>
             # <Cell ss:StyleID="s42"><Data ss:Type="Number">5.62</Data></Cell>
@@ -94,12 +99,13 @@ class excelHandel:
         # as 代表实例的意思，即 e 是Exception 类的一个实例，你可以通过e访问其具体的属性和方法
         except Exception as e:
             print('from dir ', self.excelUrl, 'load feeder source data error', repr(e))
+            LogHelper.LogError('load feeder source :'+self.excelUrl+' ，data error ex:'+str(e))
             return None
 
 
     def GetElementRowByKey(self,rootElement,key):
         key = key.lower()
-        for x in rootElement.getchildren():
+        for x in  list(rootElement):
             strcel = self.GetElementchildren(x, 0)
             str = self.GetElementText(self.GetElementchildren(strcel, 0))
 
@@ -131,7 +137,7 @@ class excelHandel:
         if element is None:
             return None
 
-        childs = element.getchildren()
+        childs = list(element)
         childlen = childs.__len__()
         if childlen < index+1:
             return None
