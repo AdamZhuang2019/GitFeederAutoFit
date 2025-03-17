@@ -37,7 +37,7 @@ class FeederFun:
         timer.start()  # 启动定时器
 
         #测试时使用此方法直接调用
-        #elf.beginFit(driver)
+        # self.beginFit(driver)
 
     def beginFit(self,driver):
         print("timer begin to run ！")
@@ -101,7 +101,16 @@ class FeederFun:
         print("[%s]:Total data to be automatically entered this time：[%d]，success：[%d]" % (datetime.now(),totalCount, successCount))
 
     def doneFit(self, driver, feederdata):
-
+        # 尝试判断界面是否隐藏了，如果隐藏了则打开
+        opentopmenu= self.find_element_by_css_selector(driver, "#main-content>.open-top-menu")
+        if opentopmenu.Result is True:
+            classstr=opentopmenu.Data.get_attribute("class")
+            if 'ng-hide' in classstr:
+                print(u'当前操作界面是展开的')
+            else:
+                print(u'当前操作界面是影藏的，需要展开')
+                opentopmenu.Data.click()
+        sleep(1)
         print(u'01-begin entered feeder data,closedNewEntry first!')
         self.closedNewEntry(driver)
         print(u'02-begin entered feeder data,closedNewEntry end!')
