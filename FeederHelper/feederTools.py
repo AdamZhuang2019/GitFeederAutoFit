@@ -125,7 +125,7 @@ class FeederFun:
             print(" 04-can not click Preventative Maintenance - New Entry button！")
             return False
 
-        print(" 05-begin input feeder sn ！")
+        print(" 05-开始输入 feeder sn ！")
 
         findSuccess = False
         trytime = 0
@@ -133,8 +133,11 @@ class FeederFun:
             try:
                 driver.find_element(By.ID,"feeder").send_keys(feederdata.FeederSn)
                 sleep(1)
-                driver.find_element(By.ID,"feeder").send_keys(Keys.ENTER)
+                print("找到feeder sn输入框 ！")
                 sleep(1)
+                driver.find_element(By.ID,"feeder").send_keys(Keys.ENTER)
+                print("按回车 ！")
+                sleep(2)
             except:
                 print("can not find input [feeder] to put in feeder sn！ try the {0} times later".format(trytime+1))
                 sleep(1)
@@ -153,7 +156,7 @@ class FeederFun:
         sleep(1)
         self.closeTip(driver)
 
-        print(" 06-get feeder sn ！")
+        print(" 06-获取输入后的 feeder sn ！")
         newsn = driver.find_element(By.ID,"feeder").get_property("value")
         if newsn == '':
             print("SN:", feederdata.FeederSn, 'illegal')
@@ -161,8 +164,8 @@ class FeederFun:
             self.closedNewEntry(driver)
             return False
 
-        print(" 07-begin find trigger select ！")
-
+        print(" 07-开始选择 trigger下拉信息 ！")
+        sleep(1)
         findSuccess = False
         trytime = 0
         triSel = None
@@ -183,22 +186,22 @@ class FeederFun:
                 findSuccess = True
                 trytime = 0
 
-        print(" 08-begin check trigger select is enable！")
-
+        print(" 08-开始判断 trigger 下拉框是否可用！")
+        sleep(1)
         canTri = triSel.get_property("disabled")
         if canTri is True:
-            print("08-01-SN:", feederdata.FeederSn, 'illegal')
+            print("trigger 下拉框不可用！本次导入退出")
             # 需要找到关闭按钮 点击关闭
             self.closedNewEntry(driver)
             return False
 
-        print(" 09-begin click trigger to show all options！")
-
+        print(" 09-开始点击 trigger 下拉框弹出所有的选项！")
+        sleep(1)
         trivalue = driver.find_element(By.CSS_SELECTOR,"#trigger>a>span>span.ng-scope").text
         if trivalue == "":
             triSel.click()
-
-            print(" 09-01-begin select trigger option")
+            sleep(1)
+            print(" 09-01-开始选择 trigger 的选项")
             findSuccess = False
             trytime = 0
             while (findSuccess is False):

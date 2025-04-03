@@ -15,6 +15,7 @@ def run():
 if __name__ == '__main__':
     try:
         # Win32ComHelper.killProcess("main.exe")
+        print('version:2025.04.03')
         run()
     except Exception as e:
         print(e)
